@@ -1,0 +1,761 @@
+// Court of Facts: AWS Edition — stylesheet (SCSS)
+@use "sass:color";
+
+// ---- tokens ----
+$gold: #ffd24a;
+$gold-d: #7a3b00;
+$purple: #1b1436;
+$purple-d: #120c24;
+$border: #4a3d78;
+$parch: #f6f1d8;
+$ink: #20160a;
+$good: #36c43a;
+$bad: #c0533f;
+$att: #e0a84a;
+$muted: #9a8fc4;
+
+$press: "Press Start 2P", monospace;
+$vt: "VT323", monospace;
+
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap");
+
+* {
+    box-sizing: border-box;
+}
+html,
+body {
+    margin: 0;
+    height: 100%;
+    background: $purple-d;
+    color: #fff;
+    font-family: $vt;
+    overflow: hidden;
+}
+img {
+    image-rendering: pixelated;
+}
+#app {
+    height: 100vh;
+    width: 100vw;
+}
+#menu,
+#game {
+    height: 100%;
+}
+.hidden {
+    display: none !important;
+}
+
+// ---------- MAIN MENU ----------
+.menu-screen {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% 20%, #2a2150, $purple-d 70%);
+    padding: 20px;
+    overflow: auto;
+}
+.menu-logo {
+    font-family: $press;
+    font-size: 34px;
+    color: $gold;
+    text-shadow: 4px 4px $gold-d;
+    letter-spacing: 2px;
+}
+.menu-sub {
+    font-family: $press;
+    font-size: 13px;
+    color: #b9a6ff;
+    margin: 6px 0 22px;
+    letter-spacing: 4px;
+}
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(260px, 320px));
+    gap: 16px;
+    max-width: 680px;
+    width: 100%;
+}
+
+.mcard {
+    background: $purple;
+    border: 3px solid $border;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 4px 4px 0 #0007;
+    &.wide {
+        grid-column: 1 / 3;
+    }
+    h3 {
+        font-family: $press;
+        font-size: 10px;
+        color: $gold;
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+}
+.radio,
+.chk {
+    display: block;
+    font-size: 21px;
+    margin: 7px 0;
+    cursor: pointer;
+    color: #e8e0ff;
+    input {
+        margin-right: 8px;
+        accent-color: $gold;
+        transform: scale(1.2);
+    }
+}
+.info {
+    font-family: $press;
+    font-size: 9px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: $gold;
+    color: $ink;
+    border: none;
+    cursor: pointer;
+}
+.stepper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: $press;
+    font-size: 16px;
+    color: $gold;
+}
+.step {
+    background: #3a2d66;
+    color: $gold;
+    border: 2px solid $gold;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+input[type="range"] {
+    width: 100%;
+    accent-color: $gold;
+}
+.tempval {
+    font-family: $press;
+    font-size: 14px;
+    color: $gold;
+    text-align: center;
+    margin-top: 8px;
+}
+.models {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px 14px;
+}
+.warn {
+    color: $att;
+    font-size: 19px;
+}
+
+.menu-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 22px;
+}
+.mbtn {
+    font-family: $press;
+    font-size: 12px;
+    border: none;
+    border-radius: 8px;
+    padding: 13px 20px;
+    cursor: pointer;
+    &.go {
+        background: $gold;
+        color: $ink;
+        box-shadow: 4px 4px 0 $gold-d;
+        &:disabled {
+            background: #4a4038;
+            color: #998;
+            box-shadow: 4px 4px 0 #000;
+            cursor: default;
+        }
+    }
+    &.ghost {
+        background: transparent;
+        color: #b9a6ff;
+        border: 2px solid $border;
+    }
+}
+.menu-hint {
+    margin-top: 14px;
+    font-size: 20px;
+    color: $muted;
+}
+
+// ---------- MODALS ----------
+#modalHost {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+}
+.m-overlay {
+    position: absolute;
+    inset: 0;
+    background: #0b0718cc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+}
+.m-box {
+    background: $purple;
+    border: 4px solid $gold;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 560px;
+    width: 90%;
+    box-shadow: 6px 6px 0 #0008;
+}
+.m-title {
+    font-family: $press;
+    font-size: 13px;
+    color: $gold;
+    margin-bottom: 14px;
+    text-align: center;
+}
+.m-content {
+    font-size: 22px;
+    color: #e8e0ff;
+    line-height: 1.3;
+    max-height: 60vh;
+    overflow: auto;
+}
+.m-text {
+    margin: 0;
+}
+.m-radios label {
+    display: block;
+    font-size: 21px;
+    margin: 8px 0;
+    cursor: pointer;
+    input {
+        margin-right: 8px;
+        accent-color: $gold;
+        transform: scale(1.2);
+    }
+}
+.m-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
+}
+.m-btn {
+    font-family: $press;
+    font-size: 10px;
+    background: #3a2d66;
+    color: #e8e0ff;
+    border: 2px solid $border;
+    border-radius: 6px;
+    padding: 10px 16px;
+    cursor: pointer;
+    &.ok {
+        background: $gold;
+        color: $ink;
+        border-color: $gold;
+    }
+}
+.htable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 18px;
+    th,
+    td {
+        border: 1px solid $border;
+        padding: 6px 8px;
+        text-align: left;
+    }
+    th {
+        font-family: $press;
+        font-size: 8px;
+        color: $gold;
+    }
+}
+
+// ---------- BATTLE ----------
+.stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: $purple-d;
+}
+.bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.layer {
+    position: absolute;
+}
+
+.king {
+    top: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 34%;
+    z-index: 2;
+    &.react {
+        animation: kingNod 0.5s;
+    }
+}
+@keyframes kingNod {
+    0%,
+    100% {
+        transform: translateX(-50%);
+    }
+    50% {
+        transform: translateX(-50%) translateY(-10px);
+    }
+}
+
+.crowdMe {
+    bottom: 40%;
+    left: 1%;
+    height: 20%;
+    z-index: 2;
+}
+.crowdFoe {
+    bottom: 40%;
+    right: 1%;
+    height: 20%;
+    z-index: 2;
+}
+.cheer {
+    animation: cheer 0.5s ease-in-out 2;
+}
+@keyframes cheer {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+.meKnight {
+    bottom: 16%;
+    left: 12%;
+    height: 40%;
+    z-index: 3;
+    transition: transform 0.15s;
+    &.attack {
+        transform: translateX(50px) rotate(-6deg);
+    }
+    &.hit {
+        animation: hitL 0.4s;
+    }
+}
+.foeKnight {
+    bottom: 16%;
+    right: 12%;
+    height: 40%;
+    z-index: 3;
+    transition: transform 0.15s;
+    &.attack {
+        transform: translateX(-50px) rotate(6deg);
+    }
+}
+@keyframes hitL {
+    0%,
+    100% {
+    }
+    30% {
+        transform: translateX(-18px);
+        filter: brightness(2.4) drop-shadow(0 0 16px #f33);
+    }
+}
+
+.trophy {
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    height: 12%;
+    opacity: 0;
+    z-index: 5;
+    &.beside {
+        opacity: 1;
+        top: 52%;
+        left: 24%;
+        transform: none;
+        height: 14%;
+    }
+}
+
+.knightName {
+    position: absolute;
+    font-family: $press;
+    font-size: 8px;
+    color: #fff;
+    background: #000a;
+    padding: 3px 6px;
+    border-radius: 4px;
+    z-index: 4;
+}
+.meKN {
+    bottom: 12%;
+    left: 12%;
+}
+.foeKN {
+    bottom: 12%;
+    right: 12%;
+}
+
+.championTag {
+    position: absolute;
+    top: 54%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: $press;
+    font-size: 16px;
+    color: $gold;
+    text-shadow: 3px 3px #000;
+    z-index: 9;
+    opacity: 0;
+    &.show {
+        opacity: 1;
+        animation: pop 0.7s;
+    }
+}
+
+.fact {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: $press;
+    font-size: 10px;
+    color: $gold;
+    background: #000b;
+    padding: 6px 12px;
+    border-radius: 6px;
+    max-width: 72%;
+    text-align: center;
+    z-index: 6;
+}
+
+.hpwrap {
+    position: absolute;
+    z-index: 6;
+    width: 260px;
+    &.me {
+        bottom: 150px;
+        left: 26px;
+    }
+    &.foe {
+        top: 60px;
+        right: 26px;
+    }
+}
+.plate {
+    background: $parch;
+    color: $ink;
+    border: 4px solid $ink;
+    border-radius: 8px;
+    padding: 7px 10px 9px;
+    box-shadow: 4px 4px 0 #0008;
+    .nm {
+        font-family: $press;
+        font-size: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+}
+.hpbar {
+    height: 12px;
+    background: #5a5a5a;
+    border: 2px solid $ink;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 6px;
+    > span {
+        display: block;
+        height: 100%;
+        width: 100%;
+        background: $good;
+        transition:
+            width 0.5s,
+            background 0.5s;
+    }
+}
+.hpnum {
+    font-family: $press;
+    font-size: 8px;
+    text-align: right;
+    margin-top: 3px;
+    color: $gold-d;
+}
+
+.dmg {
+    position: absolute;
+    font-family: $press;
+    font-size: 24px;
+    color: #ff4a4a;
+    text-shadow: 3px 3px #000;
+    pointer-events: none;
+    animation: dmg 1.1s forwards;
+    z-index: 7;
+}
+@keyframes dmg {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-70px);
+    }
+}
+
+.flash {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 8;
+    &.go {
+        animation: fl 0.5s;
+    }
+}
+@keyframes fl {
+    0%,
+    100% {
+        opacity: 0;
+    }
+    40% {
+        opacity: 0.7;
+    }
+}
+
+.verdict {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-family: $press;
+    font-size: 40px;
+    text-shadow: 5px 5px #000;
+    z-index: 9;
+    &.show {
+        animation: pop 0.7s forwards;
+    }
+    &.good {
+        color: $good;
+    }
+    &.bad {
+        color: $bad;
+    }
+}
+@keyframes pop {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+    }
+    60% {
+        transform: translate(-50%, -50%) scale(1.25);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.dbox {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 16px;
+    min-height: 96px;
+    background: $parch;
+    border: 6px solid $ink;
+    border-radius: 10px;
+    color: $ink;
+    padding: 14px 18px;
+    font-size: 26px;
+    line-height: 1.1;
+    z-index: 6;
+    .spk {
+        font-family: $press;
+        font-size: 10px;
+        color: #b06a00;
+        display: block;
+        margin-bottom: 7px;
+    }
+}
+.cursor {
+    display: inline-block;
+    animation: blink 1s steps(2) infinite;
+}
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.loader {
+    position: absolute;
+    inset: 0;
+    background: #0b0718ee;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    &.show {
+        display: flex;
+    }
+}
+.spin {
+    font-family: $press;
+    font-size: 14px;
+    color: $gold;
+}
+.bars {
+    margin-top: 14px;
+    font-size: 38px;
+    color: $gold;
+}
+
+// ---- sidebar (tab moves out with it) ----
+.sbTab {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    z-index: 17;
+    font-size: 20px;
+    background: $gold;
+    color: $ink;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    padding: 10px 8px;
+    cursor: pointer;
+    box-shadow: -2px 2px 0 $gold-d;
+    transition: right 0.25s;
+}
+.sidebar {
+    position: absolute;
+    top: 0;
+    right: -240px;
+    width: 240px;
+    height: 100%;
+    background: #160f26ee;
+    border-left: 4px solid $gold;
+    z-index: 16;
+    padding: 60px 14px 14px;
+    transition: right 0.25s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    &.open {
+        right: 0;
+    }
+    // when open, push the tab to the sidebar's left edge so it stays clickable
+    &.open + .sbTab,
+    &.open ~ .sbTab {
+        right: 240px;
+    }
+    .prog {
+        margin-top: auto;
+        font-size: 18px;
+        color: #9a8;
+        text-align: center;
+    }
+}
+.sb {
+    font-family: $press;
+    font-size: 10px;
+    background: #3a2d66;
+    color: $gold;
+    border: 2px solid $gold;
+    border-radius: 6px;
+    padding: 12px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.logbox {
+    max-height: 56vh;
+    overflow: auto;
+}
+.logline {
+    border-left: 4px solid #666;
+    padding: 6px 9px;
+    margin-bottom: 8px;
+    background: #ffffff0a;
+    border-radius: 0 6px 6px 0;
+    font-size: 18px;
+    &.defender {
+        border-color: $good;
+    }
+    &.attacker {
+        border-color: $att;
+    }
+    &.verdict {
+        border-color: $gold;
+        background: #ffd24a1a;
+    }
+    .who {
+        font-family: $press;
+        font-size: 8px;
+        opacity: 0.85;
+        display: block;
+        margin-bottom: 3px;
+    }
+}
+.tallyRow {
+    display: flex;
+    justify-content: space-between;
+    border: 2px solid #ffd24a55;
+    border-radius: 6px;
+    padding: 7px 10px;
+    margin-bottom: 7px;
+    font-size: 18px;
+    b {
+        color: $gold;
+    }
+}
+
+// ---- demo/replay-only corner banner (shown on static deploy) ----
+.demo-banner {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 220px;
+    z-index: 60;
+    pointer-events: none;
+    overflow: hidden;
+    height: 220px;
+    span {
+        position: absolute;
+        top: 42px;
+        right: -54px;
+        width: 240px;
+        transform: rotate(45deg);
+        background: $bad;
+        color: #fff;
+        font-family: $press;
+        font-size: 10px;
+        text-align: center;
+        padding: 8px 0;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 8px #0008;
+        border-top: 2px solid #fff6;
+        border-bottom: 2px solid #0004;
+    }
+}

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Court of Facts: AWS Edition</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="menu"></div>
+      <div id="game" class="hidden"></div>
+      <div class="demo-banner hidden" id="demoBanner">
+        <span>REPLAY DEMO</span>
+      </div>
+    </div>
+    <script type="module">
+      import { renderMenu } from "./js/menu.js";
+      import { startTournament } from "./js/tournament.js";
+      import { store } from "./js/storage.js";
+      import { openModal } from "./js/modals.js";
+      import { IS_STATIC } from "./js/api.js";
+
+      const menuEl = document.getElementById("menu");
+      const gameEl = document.getElementById("game");
+
+      function toMenu() {
+        gameEl.classList.add("hidden");
+        gameEl.innerHTML = "";
+        menuEl.classList.remove("hidden");
+      }
+
+      function finish({ record, results }) {
+        store.save(record); // history (localStorage + server when local)
+        const dataset = {
+          ts: record.ts,
+          config: {
+            mode: record.mode,
+            models: record.models,
+            rounds: record.rounds,
+            temperature: record.temperature,
+          },
+          champion: record.champion,
+          tally: record.tally,
+          results,
+        };
+        openModal({
+          title: "TOURNAMENT COMPLETE",
+          content:
+            `<p class="m-text">Champion: <b>${(record.champion || "-").split("/").pop().split(":")[0]}</b><br>` +
+            `Duels: ${record.duels}<br><br>Save the full transcript for next time you pick a model?</p>`,
+          buttons: [
+            { label: "BACK TO MENU", onClick: toMenu },
+            {
+              label: "DOWNLOAD DATA",
+              cls: "ok",
+              onClick: () => {
+                store.download(dataset);
+              },
+              keepOpen: true,
+            },
+          ],
+        });
+      }
+
+      function begin(cfg) {
+        menuEl.classList.add("hidden");
+        gameEl.classList.remove("hidden");
+        startTournament(gameEl, cfg, finish).catch((err) => {
+          gameEl.innerHTML =
+            '<pre style="color:#f55;font-size:18px;padding:30px;white-space:pre-wrap">BATTLE ERROR:\n' +
+            ((err && err.stack) || err) +
+            "</pre>";
+        });
+      }
+      if (IS_STATIC)
+        document.getElementById("demoBanner").classList.remove("hidden");
+      renderMenu(menuEl, begin);
+    </script>
+  </body>
+</html>
