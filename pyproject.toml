@@ -1,0 +1,16 @@
+[project]
+name = "gaslight-bench"
+version = "0.1.0"
+description = "Measures how often AI models can be talked out of a true AWS fact, judged by live AWS APIs."
+requires-python = ">=3.10"
+dependencies = ["boto3>=1.34.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["bench", "facts"]

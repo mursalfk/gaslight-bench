@@ -1,0 +1,844 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GASLIGHT: Tournament of AWS</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap");
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0b0718;
+        font-family: "VT323", monospace;
+        color: #fff;
+        overflow: hidden;
+      }
+      img {
+        image-rendering: pixelated;
+      }
+      .app {
+        display: grid;
+        grid-template-columns: 1fr 330px;
+        grid-template-rows: auto 1fr auto;
+        height: 100vh;
+      }
+      .titlebar {
+        grid-column: 1/3;
+        font-family: "Press Start 2P";
+        font-size: 14px;
+        color: #ffd24a;
+        text-align: center;
+        padding: 9px;
+        text-shadow: 2px 2px #7a3b00;
+        background: #160f26;
+        border-bottom: 4px solid #2a2140;
+      }
+      .stage {
+        position: relative;
+        overflow: hidden;
+        background: #0b0718;
+      }
+      .bg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .layer {
+        position: absolute;
+      }
+      .king {
+        top: 8%;
+        left: 50%;
+        transform: translateX(-50%);
+        height: 34%;
+        z-index: 2;
+      }
+      .king.react {
+        animation: kingNod 0.5s;
+      }
+      @keyframes kingNod {
+        0%,
+        100% {
+          transform: translateX(-50%);
+        }
+        50% {
+          transform: translateX(-50%) translateY(-10px);
+        }
+      }
+      .crowdMe {
+        bottom: 40%;
+        left: 1%;
+        height: 20%;
+        z-index: 2;
+      }
+      .crowdFoe {
+        bottom: 40%;
+        right: 1%;
+        height: 20%;
+        z-index: 2;
+      }
+      .cheer {
+        animation: cheer 0.5s ease-in-out 2;
+      }
+      @keyframes cheer {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-12px);
+        }
+      }
+      .meKnight {
+        bottom: 16%;
+        left: 12%;
+        height: 40%;
+        z-index: 3;
+        transition: transform 0.15s;
+      }
+      .foeKnight {
+        bottom: 16%;
+        right: 12%;
+        height: 40%;
+        z-index: 3;
+        transition: transform 0.15s;
+      }
+      .meKnight.attack {
+        transform: translateX(50px) rotate(-6deg);
+      }
+      .foeKnight.attack {
+        transform: translateX(-50px) rotate(6deg);
+      }
+      .meKnight.hit {
+        animation: hitL 0.4s;
+      }
+      @keyframes hitL {
+        0%,
+        100% {
+        }
+        30% {
+          transform: translateX(-18px);
+          filter: brightness(2.4) drop-shadow(0 0 16px #f33);
+        }
+      }
+      .foeKnight.hit {
+        animation: hitR 0.4s;
+      }
+      @keyframes hitR {
+        0%,
+        100% {
+        }
+        30% {
+          transform: translateX(18px);
+          filter: brightness(2.4) drop-shadow(0 0 16px #f33);
+        }
+      }
+      .trophy {
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, 0);
+        height: 12%;
+        opacity: 0;
+        z-index: 5;
+      }
+      .trophy.give {
+        animation: give 1.4s forwards;
+      }
+      @keyframes give {
+        0% {
+          opacity: 0;
+          transform: translate(-50%, 0);
+        }
+        30% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 1;
+          transform: translate(-50%, -160px) scale(1.3);
+        }
+      }
+      /* HUD */
+      .fact {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: "Press Start 2P";
+        font-size: 10px;
+        color: #ffd24a;
+        background: #000b;
+        padding: 6px 12px;
+        border-radius: 6px;
+        max-width: 80%;
+        text-align: center;
+        z-index: 6;
+      }
+      .hpwrap {
+        position: absolute;
+        z-index: 6;
+        width: 270px;
+      }
+      .hpwrap.me {
+        bottom: 150px;
+        left: 26px;
+      }
+      .hpwrap.foe {
+        top: 112px;
+        right: 26px;
+      }
+      .plate {
+        background: #f6f1d8;
+        color: #20160a;
+        border: 4px solid #20160a;
+        border-radius: 8px;
+        padding: 7px 10px 9px;
+        box-shadow: 4px 4px 0 #0008;
+      }
+      .plate .nm {
+        font-family: "Press Start 2P";
+        font-size: 10px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .hpbar {
+        height: 12px;
+        background: #5a5a5a;
+        border: 2px solid #20160a;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-top: 6px;
+      }
+      .hpbar > span {
+        display: block;
+        height: 100%;
+        width: 100%;
+        background: #36c43a;
+        transition:
+          width 0.5s,
+          background 0.5s;
+      }
+      .hpnum {
+        font-family: "Press Start 2P";
+        font-size: 8px;
+        text-align: right;
+        margin-top: 3px;
+        color: #7a3b00;
+      }
+      .dmg {
+        position: absolute;
+        font-family: "Press Start 2P";
+        font-size: 24px;
+        color: #ff4a4a;
+        text-shadow: 3px 3px #000;
+        pointer-events: none;
+        animation: dmg 1.1s forwards;
+        z-index: 7;
+      }
+      @keyframes dmg {
+        0% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-70px);
+        }
+      }
+      .flash {
+        position: absolute;
+        inset: 0;
+        background: #fff;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 8;
+      }
+      .flash.go {
+        animation: fl 0.5s;
+      }
+      @keyframes fl {
+        0%,
+        100% {
+          opacity: 0;
+        }
+        40% {
+          opacity: 0.7;
+        }
+      }
+      .verdict {
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        font-family: "Press Start 2P";
+        font-size: 42px;
+        text-shadow: 5px 5px #000;
+        z-index: 9;
+      }
+      .verdict.show {
+        animation: pop 0.7s forwards;
+      }
+      @keyframes pop {
+        0% {
+          transform: translate(-50%, -50%) scale(0);
+        }
+        60% {
+          transform: translate(-50%, -50%) scale(1.25);
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+      .verdict.good {
+        color: #36c43a;
+      }
+      .verdict.bad {
+        color: #ff4a4a;
+      }
+      .dbox {
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: 16px;
+        min-height: 110px;
+        background: #f6f1d8;
+        border: 6px solid #20160a;
+        border-radius: 10px;
+        color: #20160a;
+        padding: 14px 18px;
+        font-size: 28px;
+        line-height: 1.1;
+        z-index: 6;
+      }
+      .dbox .spk {
+        font-family: "Press Start 2P";
+        font-size: 10px;
+        color: #b06a00;
+        display: block;
+        margin-bottom: 7px;
+      }
+      .cursor {
+        display: inline-block;
+        animation: blink 1s steps(2) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      .loader {
+        position: absolute;
+        inset: 0;
+        background: #0b0718ee;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+      }
+      .loader.show {
+        display: flex;
+      }
+      .spin {
+        font-family: "Press Start 2P";
+        font-size: 14px;
+        color: #ffd24a;
+      }
+      .bars {
+        margin-top: 14px;
+        font-size: 38px;
+        color: #ffd24a;
+      }
+      .side {
+        background: #160f26;
+        border-left: 4px solid #2a2140;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .tabs {
+        display: flex;
+      }
+      .tabs button {
+        flex: 1;
+        font-family: "Press Start 2P";
+        font-size: 8px;
+        background: #20183a;
+        color: #9a8;
+        border: none;
+        border-bottom: 3px solid transparent;
+        padding: 9px 2px;
+        cursor: pointer;
+      }
+      .tabs button.on {
+        color: #ffd24a;
+        border-color: #ffd24a;
+      }
+      .log {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+        font-size: 19px;
+      }
+      .logline {
+        border-left: 4px solid #666;
+        padding: 6px 9px;
+        margin-bottom: 8px;
+        background: #ffffff0a;
+        border-radius: 0 6px 6px 0;
+      }
+      .logline.defender {
+        border-color: #36c43a;
+      }
+      .logline.attacker {
+        border-color: #e0a84a;
+      }
+      .logline.verdict {
+        border-color: #ffd24a;
+        background: #ffd24a1a;
+        font-size: 18px;
+      }
+      .logline .who {
+        font-family: "Press Start 2P";
+        font-size: 8px;
+        opacity: 0.85;
+        display: block;
+        margin-bottom: 3px;
+      }
+      .tallyBox {
+        display: none;
+        padding: 10px;
+        font-size: 20px;
+      }
+      .tallyBox.on {
+        display: block;
+      }
+      .tallyRow {
+        display: flex;
+        justify-content: space-between;
+        border: 2px solid #ffd24a55;
+        border-radius: 6px;
+        padding: 7px 10px;
+        margin-bottom: 7px;
+      }
+      .tallyRow b {
+        color: #ffd24a;
+      }
+      .controls {
+        grid-column: 1/3;
+        background: #160f26;
+        border-top: 4px solid #2a2140;
+        text-align: center;
+        padding: 9px;
+      }
+      .controls button {
+        font-family: "Press Start 2P";
+        font-size: 11px;
+        background: #ffd24a;
+        color: #20160a;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 16px;
+        margin: 0 4px;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 #7a3b00;
+      }
+      .controls button.off {
+        background: #4a4038;
+        color: #aaa;
+        box-shadow: 3px 3px 0 #000;
+      }
+      .controls .prog {
+        display: inline-block;
+        margin-left: 12px;
+        font-size: 22px;
+        color: #9a8;
+      }
+      .knightName {
+        position: absolute;
+        font-family: "Press Start 2P";
+        font-size: 8px;
+        color: #fff;
+        background: #000a;
+        padding: 3px 6px;
+        border-radius: 4px;
+        z-index: 4;
+      }
+      .meKN {
+        bottom: 12%;
+        left: 12%;
+      }
+      .foeKN {
+        bottom: 12%;
+        right: 12%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="titlebar">GASLIGHT &#9876;&#65039; THE TOURNAMENT OF AWS</div>
+      <div class="stage" id="stage">
+        <img class="bg" src="./assets/bg.png" alt="" />
+        <img class="layer crowdMe" id="crowdMe" src="./assets/crowd_blue.png" />
+        <img
+          class="layer crowdFoe"
+          id="crowdFoe"
+          src="./assets/crowd_green.png"
+        />
+        <img class="layer king" id="king" src="./assets/king.png" />
+        <img class="layer trophy" id="trophy" src="./assets/trophy.png" />
+        <img
+          class="layer meKnight"
+          id="meKnight"
+          src="./assets/knight_blue.png"
+        />
+        <img
+          class="layer foeKnight"
+          id="foeKnight"
+          src="./assets/knight_green.png"
+        />
+        <div class="knightName meKN" id="meKN">DEFENDER</div>
+        <div class="knightName foeKN" id="foeKN">DECEIVER</div>
+        <div class="fact" id="fact">The tournament awaits a challenger...</div>
+        <div class="hpwrap me">
+          <div class="plate">
+            <div class="nm">
+              <span id="meName">DEFENDER</span><span>HP</span>
+            </div>
+            <div class="hpbar"><span id="meHp"></span></div>
+            <div class="hpnum" id="meHpNum">100/100</div>
+          </div>
+        </div>
+        <div class="hpwrap foe">
+          <div class="plate">
+            <div class="nm">
+              <span id="foeName">DECEIVER</span><span>LIE</span>
+            </div>
+            <div class="hpbar">
+              <span id="foeHp" style="background: #c0533f"></span>
+            </div>
+          </div>
+        </div>
+        <div class="flash" id="flash"></div>
+        <div class="verdict" id="verdict"></div>
+        <div class="dbox">
+          <span class="spk" id="spk">HERALD</span><span id="dtext"></span
+          ><span class="cursor" id="cursor">&#9662;</span>
+        </div>
+        <div class="loader" id="loader">
+          <div class="spin" id="spinTxt">SUMMONING...</div>
+          <div class="bars" id="bars">
+            &#9617;&#9617;&#9617;&#9617;&#9617;&#9617;
+          </div>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="tabs">
+          <button id="tabLog" class="on">LOG</button
+          ><button id="tabTally">TALLY</button>
+        </div>
+        <div class="log" id="log"></div>
+        <div class="tallyBox" id="tallyBox"></div>
+      </aside>
+      <div class="controls">
+        <button id="modeLive">LIVE</button
+        ><button id="modeReplay" class="off">REPLAY</button>
+        <button id="startBtn">BEGIN TOURNAMENT</button
+        ><button id="askBtn">ASK AWS</button>
+        <span class="prog" id="prog"></span>
+      </div>
+    </div>
+    <script>
+      const $ = (id) => document.getElementById(id),
+        short = (m) => m.split("/").pop().split(":")[0];
+      let mode = "live",
+        plan = null,
+        dataset = null,
+        caveCount = {};
+      function setMode(m) {
+        mode = m;
+        $("modeLive").className = m === "live" ? "" : "off";
+        $("modeReplay").className = m === "replay" ? "" : "off";
+      }
+      setMode("live");
+      $("modeLive").onclick = () => setMode("live");
+      $("modeReplay").onclick = () => setMode("replay");
+      $("tabLog").onclick = () => {
+        $("tabLog").classList.add("on");
+        $("tabTally").classList.remove("on");
+        $("log").style.display = "block";
+        $("tallyBox").classList.remove("on");
+      };
+      $("tabTally").onclick = () => {
+        $("tabTally").classList.add("on");
+        $("tabLog").classList.remove("on");
+        $("log").style.display = "none";
+        $("tallyBox").classList.add("on");
+      };
+      $("askBtn").onclick = async () => {
+        const d = prompt("Ask AWS: quota, pricing, or describe", "quota");
+        if (!d) return;
+        const r = await fetch("/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ domain: d }),
+        });
+        const j = await r.json();
+        alert(
+          j.error
+            ? "error: " + j.error
+            : j.question + "\n\nAWS decrees: " + j.truth,
+        );
+      };
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+      function setHP(p) {
+        const s = $("meHp");
+        s.style.width = Math.max(0, p) + "%";
+        s.style.background =
+          p > 50 ? "#36c43a" : p > 20 ? "#e0b020" : "#c0533f";
+        $("meHpNum").textContent = Math.max(0, Math.round(p)) + "/100";
+      }
+      function setFoeHP(p) {
+        $("foeHp").style.width = Math.max(0, p) + "%";
+      }
+      async function type(spk, text) {
+        $("spk").textContent = spk;
+        $("dtext").textContent = "";
+        $("cursor").style.display = "none";
+        for (let i = 0; i < text.length; i++) {
+          $("dtext").textContent += text[i];
+          if (i % 2 === 0) await sleep(10);
+        }
+        $("cursor").style.display = "inline-block";
+      }
+      function dmg(n) {
+        const d = document.createElement("div");
+        d.className = "dmg";
+        d.textContent = "-" + n;
+        d.style.left = "18%";
+        d.style.top = "45%";
+        $("stage").appendChild(d);
+        setTimeout(() => d.remove(), 1100);
+      }
+      function attack(who) {
+        const k = who === "attacker" ? $("foeKnight") : $("meKnight");
+        k.classList.add("attack");
+        setTimeout(() => k.classList.remove("attack"), 240);
+      }
+      function hit() {
+        $("meKnight").classList.add("hit");
+        setTimeout(() => $("meKnight").classList.remove("hit"), 400);
+        $("flash").classList.add("go");
+        setTimeout(() => $("flash").classList.remove("go"), 500);
+      }
+      function cheer(side) {
+        const c = $(side === "me" ? "crowdMe" : "crowdFoe");
+        c.classList.add("cheer");
+        setTimeout(() => c.classList.remove("cheer"), 1000);
+      }
+      function kingReact() {
+        $("king").classList.add("react");
+        setTimeout(() => $("king").classList.remove("react"), 500);
+      }
+      function giveTrophy() {
+        const t = $("trophy");
+        t.classList.remove("give");
+        void t.offsetWidth;
+        t.classList.add("give");
+      }
+      function logLine(cls, who, text) {
+        const d = document.createElement("div");
+        d.className = "logline " + cls;
+        d.innerHTML = `<span class="who">${who}</span>${text}`;
+        $("log").prepend(d);
+      }
+      function renderTally() {
+        $("tallyBox").innerHTML = Object.keys(caveCount)
+          .map(
+            (m) =>
+              `<div class="tallyRow"><span>${short(m)}</span><b>${caveCount[m]} caves</b></div>`,
+          )
+          .join("");
+      }
+      function showLoader(m) {
+        $("spinTxt").textContent =
+          "SUMMONING " + short(m).toUpperCase() + "...";
+        $("loader").classList.add("show");
+        let i = 0;
+        return setInterval(() => {
+          i = (i + 1) % 7;
+          $("bars").textContent = "█".repeat(i) + "░".repeat(6 - i);
+        }, 200);
+      }
+      function hideLoader(t) {
+        clearInterval(t);
+        $("loader").classList.remove("show");
+      }
+
+      async function duel(d) {
+        $("meName").textContent = short(d.defender).toUpperCase();
+        $("foeName").textContent = short(d.attacker).toUpperCase();
+        $("meKN").textContent = short(d.defender).toUpperCase();
+        $("foeKN").textContent = short(d.attacker).toUpperCase();
+        $("fact").textContent = `"${d.question}"  (truth: ${d.truth})`;
+        $("verdict").className = "verdict";
+        $("verdict").textContent = "";
+        setHP(100);
+        setFoeHP(100);
+        logLine(
+          "verdict",
+          "NEW DUEL",
+          `${short(d.defender)} vs ${short(d.attacker)} — ${d.domain || ""}`,
+        );
+        await type(
+          "HERALD",
+          `Sir ${short(d.defender).toUpperCase()} must defend the truth: ${d.truth}!`,
+        );
+        await sleep(800);
+        let hp = 100,
+          rounds = 0;
+        for (const t of d.turns) {
+          logLine(
+            t.who,
+            t.who === "defender" ? short(d.defender) : short(d.attacker),
+            t.text,
+          );
+          if (t.who === "attacker") {
+            attack("attacker");
+            await type(short(d.attacker).toUpperCase() + " STRIKES!", t.text);
+            await sleep(450);
+            hit();
+            dmg(18 + Math.floor(Math.random() * 10));
+            cheer("foe");
+          } else {
+            rounds++;
+            await type(short(d.defender).toUpperCase(), t.text);
+            if (t.caved) {
+              hp = 8;
+              setHP(hp);
+              hit();
+              dmg(60);
+            } else {
+              hp = Math.max(55, 100 - (rounds - 1) * 10);
+              setHP(hp);
+              attack("defender");
+              cheer("me");
+            }
+          }
+          await sleep(t.who === "attacker" ? 1000 : 1300);
+        }
+        $("flash").classList.add("go");
+        kingReact();
+        if (d.final_wrong) {
+          caveCount[d.defender] = (caveCount[d.defender] || 0) + 1;
+          setHP(0);
+          $("verdict").textContent = "DECEIVED!";
+          $("verdict").className = "verdict bad show";
+          cheer("foe");
+          await type(
+            "AWS, THE KING",
+            `Sir ${short(d.defender).toUpperCase()} was deceived! The truth was ${d.truth}.`,
+          );
+          logLine(
+            "verdict",
+            "ROYAL DECREE",
+            `${short(d.defender)} CAVED. Truth: ${d.truth}`,
+          );
+        } else {
+          setFoeHP(0);
+          $("verdict").textContent = "VICTORY!";
+          $("verdict").className = "verdict good show";
+          cheer("me");
+          giveTrophy();
+          await type(
+            "AWS, THE KING",
+            `Sir ${short(d.defender).toUpperCase()} held true! I reward thee.`,
+          );
+          logLine(
+            "verdict",
+            "ROYAL DECREE",
+            `${short(d.defender)} HELD. Truth: ${d.truth}`,
+          );
+        }
+        renderTally();
+        await sleep(2400);
+      }
+      async function coronation() {
+        const names = Object.keys(caveCount);
+        if (!names.length) return;
+        const champ = names.reduce((a, b) =>
+          caveCount[a] <= caveCount[b] ? a : b,
+        );
+        kingReact();
+        giveTrophy();
+        $("verdict").textContent = "CHAMPION!";
+        $("verdict").className = "verdict good show";
+        cheer("me");
+        cheer("foe");
+        await type(
+          "AWS, THE KING",
+          `The tournament is ended! ${short(champ).toUpperCase()} resisted deception best (${caveCount[champ]} caves). I crown thee CHAMPION of the realm!`,
+        );
+        logLine(
+          "verdict",
+          "CORONATION",
+          `Champion: ${short(champ)} (${caveCount[champ]} caves)`,
+        );
+      }
+      async function runLive() {
+        const r = await fetch("/plan");
+        const p = await r.json();
+        plan = p.fights;
+        p.models.forEach((m) => (caveCount[m] = 0));
+        renderTally();
+        for (let i = 0; i < plan.length; i++) {
+          $("prog").textContent = `DUEL ${i + 1}/${plan.length}`;
+          const lt = showLoader(plan[i].defender);
+          const res = await fetch("/fight", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ index: i }),
+          });
+          const d = await res.json();
+          hideLoader(lt);
+          if (d.done) break;
+          if (d.error) {
+            await type("ERROR", d.error);
+            continue;
+          }
+          await duel(d);
+        }
+        await coronation();
+      }
+      async function runReplay() {
+        const r = await fetch("/dataset.json");
+        dataset = await r.json();
+        dataset.results.forEach((x) => (caveCount[x.defender] = 0));
+        renderTally();
+        for (let i = 0; i < dataset.results.length; i++) {
+          $("prog").textContent = `DUEL ${i + 1}/${dataset.results.length}`;
+          await duel(dataset.results[i]);
+        }
+        await coronation();
+      }
+      $("startBtn").onclick = async () => {
+        $("startBtn").disabled = true;
+        $("log").innerHTML = "";
+        caveCount = {};
+        try {
+          if (mode === "live") await runLive();
+          else await runReplay();
+        } catch (e) {
+          await type("ERROR", e.message);
+        }
+        $("startBtn").disabled = false;
+      };
+    </script>
+  </body>
+</html>
