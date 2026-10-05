@@ -15,11 +15,16 @@ export async function startTournament(rootEl, cfg, onDone) {
       let data;
       try { data = await api.dataset(); } catch (e) { B.$("fact").textContent = "No dataset to replay."; return; }
       const fights = (data && data.results) || [];
-      if (!fights.length) { B.$("fact").textContent = "Dataset is empty."; return; }
-      for (let i = 0; i < fights.length; i++) {
+      // only duels that carry full transcripts can be animated
+      const usable = fights.filter((f) => Array.isArray(f.turns) && f.turns.length);
+      if (!usable.length) {
+        B.$("fact").textContent = "This dataset has no transcripts to replay. Run a live tournament and download it.";
+        return;
+      }
+      for (let i = 0; i < usable.length; i++) {
         if (battleControls.stopped) break;
-        await B.runDuel(fights[i], i, fights.length);
-        results.push(fights[i]);
+        await B.runDuel(usable[i], i, usable.length);
+        results.push(usable[i]);
       }
     } else {
       const plan = await api.plan(cfg);
@@ -47,9 +52,11 @@ export async function startTournament(rootEl, cfg, onDone) {
     for (const n of names) { if (tally[n] < best) { best = tally[n]; champ = n; } }
     if (champ) B.showChampion(champ, best);
 
-    const record = { id: "t_" + Date.now(), ts: Date.now(), mode: cfg.mode,
+    const record = {
+      id: "t_" + Date.now(), ts: Date.now(), mode: cfg.mode,
       models: cfg.models || names, rounds: cfg.rounds, temperature: cfg.temperature,
-      duels: results.length, champion: champ, tally };
+      duels: results.length, champion: champ, tally
+    };
     if (onDone) onDone({ record, results });
   } catch (err) {
     rootEl.innerHTML = '<pre style="color:#f55;font-size:18px;padding:30px;white-space:pre-wrap">BATTLE ERROR:\n' + (err && err.stack || err) + '</pre>';
