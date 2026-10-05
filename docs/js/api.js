@@ -1,7 +1,8 @@
 // api.js - server talk + static-deploy fallback.
 // Local server: /plan /fight /ask /models /history /dataset.json
 // Static deploy (GitHub Pages/Netlify): no server -> replay only, from ./data/dataset.json
-export const IS_STATIC = (location.protocol === "file:") || (!location.port && !location.hostname.includes("localhost"));
+// Live mode needs the local Python server. Treat ANYTHING that is not localhost/127.0.0.1 as static.
+export const IS_STATIC = !/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 export const ASSET = (name) => `./assets/${name}`;
 
 async function post(path, body) {
@@ -10,14 +11,11 @@ async function post(path, body) {
 }
 async function get(path) { const r = await fetch(path); if (!r.ok) throw new Error(path + " -> " + r.status); return r.json(); }
 
-async function bundledDataset(){
-  // base = directory of index.html, works on GitHub Pages subpaths
-  const base = location.pathname.replace(/[^/]*$/, "");
-  const r = await fetch(base + "data/dataset.json");
-  if(!r.ok) throw new Error("no bundled dataset ("+r.status+")");
-  const txt = await r.text();
-  try { return JSON.parse(txt); }
-  catch { throw new Error("dataset is not JSON (got HTML 404?)"); }
+async function bundledDataset() {
+  // shipped with a static build; used when no live server
+  const r = await fetch("./data/dataset.json");
+  if (!r.ok) throw new Error("no bundled dataset");
+  return r.json();
 }
 
 export const api = {
