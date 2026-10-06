@@ -759,3 +759,85 @@ input[type="range"] {
         border-bottom: 2px solid #0004;
     }
 }
+
+// ---------- PODIUM ----------
+.podium-screen {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% 20%, #2a2150, $purple-d 70%);
+    padding: 24px;
+    overflow: auto;
+}
+.podium-title {
+    font-family: $press;
+    font-size: 24px;
+    color: $gold;
+    text-shadow: 3px 3px $gold-d;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+}
+.podium-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+}
+.pstep {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.pknight {
+    font-size: 44px;
+    margin-bottom: 4px;
+}
+.pname {
+    font-family: $press;
+    font-size: 10px;
+    color: #e8e0ff;
+    margin-bottom: 6px;
+}
+.pblock {
+    width: 120px;
+    background: $gold;
+    border: 3px solid $ink;
+    border-radius: 6px 6px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 4px 4px 0 #0007;
+    .prank {
+        font-family: $press;
+        font-size: 28px;
+        color: $ink;
+    }
+    .pcaves {
+        font-family: $press;
+        font-size: 8px;
+        color: $gold-d;
+        margin-top: 6px;
+    }
+}
+.ptable {
+    margin-top: 24px;
+    border-collapse: collapse;
+    font-size: 18px;
+    color: #e8e0ff;
+    td {
+        border: 1px solid $border;
+        padding: 6px 14px;
+    }
+    td:first-child {
+        color: $gold;
+        font-family: $press;
+        font-size: 10px;
+    }
+}
+.podium-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+}

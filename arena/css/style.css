@@ -842,4 +842,93 @@ input[type=range] {
   border-top: 2px solid rgba(255, 255, 255, 0.4);
   border-bottom: 2px solid rgba(0, 0, 0, 0.2666666667);
 }
+
+.podium-screen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 20%, #2a2150, #120c24 70%);
+  padding: 24px;
+  overflow: auto;
+}
+
+.podium-title {
+  font-family: "Press Start 2P", monospace;
+  font-size: 24px;
+  color: #ffd24a;
+  text-shadow: 3px 3px #7a3b00;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+.podium-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.pstep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pknight {
+  font-size: 44px;
+  margin-bottom: 4px;
+}
+
+.pname {
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  color: #e8e0ff;
+  margin-bottom: 6px;
+}
+
+.pblock {
+  width: 120px;
+  background: #ffd24a;
+  border: 3px solid #20160a;
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4666666667);
+}
+.pblock .prank {
+  font-family: "Press Start 2P", monospace;
+  font-size: 28px;
+  color: #20160a;
+}
+.pblock .pcaves {
+  font-family: "Press Start 2P", monospace;
+  font-size: 8px;
+  color: #7a3b00;
+  margin-top: 6px;
+}
+
+.ptable {
+  margin-top: 24px;
+  border-collapse: collapse;
+  font-size: 18px;
+  color: #e8e0ff;
+}
+.ptable td {
+  border: 1px solid #4a3d78;
+  padding: 6px 14px;
+}
+.ptable td:first-child {
+  color: #ffd24a;
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+}
+
+.podium-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+}
 /*# sourceMappingURL=style.css.map */

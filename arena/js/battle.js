@@ -3,7 +3,7 @@
 // driven by awaited sleeps that we gate on a paused flag and re-check on visibility (#3).
 import { openModal } from "./modals.js";
 
-const short = (m) => (m || "").split("/").pop().split(":")[0];
+function short(m) { return (m || "").split("/").pop(); }
 
 // ---- controllable, visibility-safe sleep ----
 const ctrl = { paused: false, stopped: false };

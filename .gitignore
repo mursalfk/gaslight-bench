@@ -5,3 +5,7 @@ __pycache__/
 .pytest_cache/
 results/dataset.json
 results/
+*.zip
+*.rar
+Images/
+Article/

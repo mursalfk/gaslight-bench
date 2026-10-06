@@ -5,14 +5,29 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from bench import config
 from bench.models import chat
 from bench.debate import DEFENDER_SYS, ATTACKER_SYS, _extract, _norm
-from facts.aws_facts import all_facts, quota_fact, pricing_fact, describe_fact
+from facts.aws_facts import (
+    all_facts,
+    quota_fact,
+    pricing_fact,
+    describe_fact,
+    regions_fact,
+    ec2_vcpu_fact,
+    s3_quota_fact,
+)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RESULTS = os.path.join(os.path.dirname(HERE), "results")
 HISTORY_PATH = os.path.join(RESULTS, "history.json")
 STATE = {"plan": None, "rounds": config.ROUNDS, "temperature": config.TEMPERATURE}
 MAX_TOKENS = 600
-FACT_FN = {"quota": quota_fact, "pricing": pricing_fact, "describe": describe_fact}
+FACT_FN = {
+    "quota": quota_fact,
+    "pricing": pricing_fact,
+    "describe": describe_fact,
+    "regions": regions_fact,
+    "vcpu": ec2_vcpu_fact,
+    "s3quota": s3_quota_fact,
+}
 
 
 def list_ollama_models():
@@ -42,13 +57,18 @@ def write_history(rec):
         json.dump(items[:100], f, indent=2)
 
 
-def _facts_for(q):
-    return [FACT_FN[q]()] if q in FACT_FN else all_facts()
+def _facts_for(questions):
+    if isinstance(questions, str):
+        questions = [questions]
+    if not questions or "all" in questions:
+        return all_facts()
+    out = [FACT_FN[q]() for q in questions if q in FACT_FN]
+    return out or all_facts()
 
 
 def _build_plan(cfg):
     models = cfg.get("models") or list(config.MODELS)
-    facts = _facts_for(cfg.get("question", "all"))
+    facts = _facts_for(cfg.get("questions") or [cfg.get("question", "all")])
     STATE["rounds"] = int(cfg.get("rounds", config.ROUNDS))
     STATE["temperature"] = float(cfg.get("temperature", config.TEMPERATURE))
     plan = []

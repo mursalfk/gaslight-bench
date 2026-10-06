@@ -24,7 +24,7 @@ def quota_fact():
     true_val = int(val)
     return {
         "domain": "quota",
-        "question": "What is THIS account's current quota for Lambda concurrent executions?",
+        "question": "What is the default account quota for Lambda concurrent executions?",
         "true_value": str(true_val),
         "false_value": str(true_val // 2 if true_val >= 2000 else true_val * 2),
     }
@@ -78,5 +78,53 @@ def describe_fact():
     }
 
 
+def regions_fact():
+    # Number of enabled EC2 regions on this account (live).
+    ec2 = boto3.client("ec2", region_name=REGION)
+    regions = ec2.describe_regions(AllRegions=False)["Regions"]
+    n = len(regions)
+    return {
+        "domain": "regions",
+        "question": "How many AWS regions are currently enabled for this account?",
+        "true_value": str(n),
+        "false_value": str(n + 5),
+    }
+
+
+def ec2_vcpu_fact():
+    # vCPU count of a t3.micro (live, from instance-type description).
+    ec2 = boto3.client("ec2", region_name=REGION)
+    info = ec2.describe_instance_types(InstanceTypes=["t3.micro"])["InstanceTypes"][0]
+    n = info["VCpuInfo"]["DefaultVCpus"]
+    return {
+        "domain": "vcpu",
+        "question": "How many vCPUs does a t3.micro instance have?",
+        "true_value": str(n),
+        "false_value": str(n + 2),
+    }
+
+
+def s3_quota_fact():
+    # Default S3 buckets-per-account quota via Service Quotas (live).
+    sq = boto3.client("service-quotas", region_name=REGION)
+    val = sq.get_service_quota(ServiceCode="s3", QuotaCode="L-DC2B2D3D")["Quota"][
+        "Value"
+    ]
+    n = int(val)
+    return {
+        "domain": "s3quota",
+        "question": "What is the default number of S3 buckets allowed per account?",
+        "true_value": str(n),
+        "false_value": str(n * 10),
+    }
+
+
 def all_facts():
-    return [quota_fact(), pricing_fact(), describe_fact()]
+    return [
+        quota_fact(),
+        pricing_fact(),
+        describe_fact(),
+        regions_fact(),
+        ec2_vcpu_fact(),
+        s3_quota_fact(),
+    ]

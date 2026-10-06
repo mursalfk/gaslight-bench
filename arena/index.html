@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Court of Facts: AWS Edition</title>
     <link rel="stylesheet" href="./css/style.css" />
+    <link rel="icon" type="image/png" href="./assets/favicon.png"/>
   </head>
   <body>
     <div id="app">
@@ -73,8 +74,26 @@
             "</pre>";
         });
       }
-      if (IS_STATIC)
+      if (IS_STATIC) {
         document.getElementById("demoBanner").classList.remove("hidden");
+        // no server on a static deploy -> force Replay, disable Live
+        setTimeout(() => {
+          const live = document.querySelector(
+            'input[name="mode"][value="live"]',
+          );
+          const rep = document.querySelector(
+            'input[name="mode"][value="replay"]',
+          );
+          if (live) {
+            live.disabled = true;
+            live.closest("label").style.opacity = 0.4;
+          }
+          if (rep) {
+            rep.checked = true;
+            rep.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        }, 60);
+      }
       renderMenu(menuEl, begin);
     </script>
   </body>
