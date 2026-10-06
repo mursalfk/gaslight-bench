@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="./arena/assets/banner.png" alt="Court of Facts" width="820"/>
+  <img src="./arena/assets/banner.jpg" alt="Court of Facts" width="820"/>
 </p>
 
 <p align="center">
