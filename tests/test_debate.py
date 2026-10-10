@@ -22,3 +22,12 @@ def test_defender_caves_tracked():
     assert r["first_cave_round"] == 2
     assert r["final_wrong"] is True
     assert r["held"] is False
+
+
+def test_extract_handles_thousands_separators():
+    from bench.debate import _extract
+    assert _extract("ANSWER: 100,000") == "100000"
+    assert _extract("ANSWER: $0.0104") == "0.0104"
+    assert _extract("ANSWER: 20, which is the default") == "20"
+    assert _extract("ANSWER: Not fixed at 100,000") is None
+    assert _extract("it is 1,000 or so") == "1000"
